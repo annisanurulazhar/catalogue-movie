@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Katalog Film</string>
+    <string name="film_search_hint">Cari Judul Film</string>
+    <string name="film_search_button_text">Cari</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="movie_title_now_playing">SEDANG DIMAINKAN</string>
+    <string name="movie_title_upcoming">MENDATANG</string>
+    <string name="movie_details_title">Judul</string>
+    <string name="movie_details_duration">Durasi</string>
+    <string name="movie_details_genre">Genre</string>
+    <string name="movie_details_date">Tanggal</string>
+    <string name="movie_details_rating">Rating</string>
+
+    <string name="text_month_january">Januari</string>
+    <string name="text_month_february">Februari</string>
+    <string name="text_month_march">Maret</string>
+    <string name="text_month_april">April</string>
+    <string name="text_month_may">Mei</string>
+    <string name="text_month_june">Juni</string>
+    <string name="text_month_july">Juli</string>
+    <string name="text_month_august">Agustus</string>
+    <string name="text_month_september">September</string>
+    <string name="text_month_october">Oktober</string>
+    <string name="text_month_november">November</string>
+    <string name="text_month_december">Desember</string>
+    <string name="text_nav_open">Pengaturan</string>
+    <string name="text_minutes">%s menit</string>
+    <string name="text_movie_details">Detail Film</string>
+
+</resources>

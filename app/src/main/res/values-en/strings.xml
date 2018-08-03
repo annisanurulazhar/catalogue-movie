@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Movie Catalogue</string>
+    <string name="film_search_hint">Search Movie Title</string>
+    <string name="film_search_button_text">Search</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="movie_title_now_playing">NOW PLAYING</string>
+    <string name="movie_title_upcoming">UPCOMING</string>
+    <string name="movie_details_title">Title</string>
+    <string name="movie_details_duration">Duration</string>
+    <string name="movie_details_genre">Genre</string>
+    <string name="movie_details_date">Date</string>
+    <string name="movie_details_rating">Rating</string>
+    <string name="text_month_january">January</string>
+    <string name="text_month_february">February</string>
+    <string name="text_month_march">March</string>
+    <string name="text_month_april">April</string>
+    <string name="text_month_may">May</string>
+    <string name="text_month_june">June</string>
+    <string name="text_month_july">July</string>
+    <string name="text_month_august">August</string>
+    <string name="text_month_september">September</string>
+    <string name="text_month_october">October</string>
+    <string name="text_month_november">November</string>
+    <string name="text_month_december">December</string>
+    <string name="text_nav_open">Settings</string>
+    <string name="text_minutes">%s minutes</string>
+    <string name="text_movie_details">Movie Details</string>
+
+</resources>
