@@ -5,8 +5,12 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <permission android:name="com.example.annisaazhar.cataloguemovie.READ_DATABASE" android:protectionLevel="normal"/>
-    <permission android:name="com.example.annisaazhar.cataloguemovie.WRITE_DATABASE" android:protectionLevel="normal"/>
+    <permission
+        android:name="com.example.annisaazhar.cataloguemovie.READ_DATABASE"
+        android:protectionLevel="normal" />
+    <permission
+        android:name="com.example.annisaazhar.cataloguemovie.WRITE_DATABASE"
+        android:protectionLevel="normal" />
 
     <application
         android:allowBackup="true"
@@ -23,9 +27,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".DetailsActivity" />
+        <activity android:name=".FavActivity"></activity>
         <provider
-            android:authorities="com.example.annisaazhar.cataloguemovie"
             android:name=".provider.MovieProvider"
+            android:authorities="com.example.annisaazhar.cataloguemovie"
             android:exported="true"
             android:readPermission="com.example.annisaazhar.cataloguemovie.READ_DATABASE"
             android:writePermission="com.example.annisaazhar.cataloguemovie.WRITE_DATABASE" />

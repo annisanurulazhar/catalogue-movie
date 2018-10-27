@@ -240,6 +240,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_settings) {
             Intent mIntent = new Intent(Settings.ACTION_LOCALE_SETTINGS);
             startActivity(mIntent);
+        } else if (id == R.id.fav_menu) {
+            Intent favIntent = new Intent(MainActivity.this, FavActivity.class);
+            startActivity(favIntent);
         }
         return false;
     }
