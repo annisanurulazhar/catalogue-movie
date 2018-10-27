@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.annisaazhar.cataloguemovie">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <permission android:name="com.example.annisaazhar.cataloguemovie.READ_DATABASE" android:protectionLevel="normal"/>
+    <permission android:name="com.example.annisaazhar.cataloguemovie.WRITE_DATABASE" android:protectionLevel="normal"/>
 
     <application
         android:allowBackup="true"
@@ -19,6 +23,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".DetailsActivity" />
+        <provider
+            android:authorities="com.example.annisaazhar.cataloguemovie"
+            android:name=".provider.MovieProvider"
+            android:exported="true"
+            android:readPermission="com.example.annisaazhar.cataloguemovie.READ_DATABASE"
+            android:writePermission="com.example.annisaazhar.cataloguemovie.WRITE_DATABASE" />
     </application>
 
 </manifest>

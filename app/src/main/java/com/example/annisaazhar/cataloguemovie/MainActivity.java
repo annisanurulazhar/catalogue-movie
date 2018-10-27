@@ -3,9 +3,14 @@ package com.example.annisaazhar.cataloguemovie;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -15,7 +20,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,8 +33,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -42,6 +44,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static com.example.annisaazhar.cataloguemovie.provider.DatabaseContract.CONTENT_URI;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     public static final String KEY_PAGETYPE = "pageType";
@@ -62,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ViewPager viewPager;
     private DrawerLayout drawer;
     ActionBarDrawerToggle toggle;
+
+    private Cursor listFav;
 
 
     @Override
@@ -89,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         rvContentSearch = findViewById(R.id.rvContentSearch);
         setupRecyclerView();
+
+        new LoadFavAsync().execute();
     }
 
     @Override
@@ -339,8 +347,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
                     int movieID = movieList.get(recyclerViewItemPosition).getMovieId();
+                    int id = movieList.get(recyclerViewItemPosition).get_id();
                     intent.putExtra(MOVIE_ID, movieID);
-                    startActivity(intent);
+                    startActivityForResult(intent, DetailsActivity.REQUEST_CODE);
                 }
 
                 return false;
@@ -356,5 +365,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == DetailsActivity.REQUEST_CODE) {
+            if (resultCode == DetailsActivity.RESULT_ADD) {
+                new LoadFavAsync().execute();
+                Toast.makeText(getApplicationContext(), "Berhasil menambahkan ke favorit", Toast.LENGTH_LONG).show();
+            } else if (resultCode == DetailsActivity.RESULT_DELETE) {
+                new LoadFavAsync().execute();
+                Toast.makeText(getApplicationContext(), "Berhasil menghapus dari favorit", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private class LoadFavAsync extends AsyncTask<Void, Void, Cursor> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+        @Override
+        protected Cursor doInBackground(Void... voids) {
+            return getContentResolver().query(CONTENT_URI, null, null, null, null, null);
+        }
+
+        @Override
+        protected void onPostExecute(Cursor cursor) {
+            super.onPostExecute(cursor);
+            listFav = cursor;
+
+            if (listFav.getCount() == 0) {
+                Toast.makeText(getApplicationContext(), "Belum ada film favorit", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

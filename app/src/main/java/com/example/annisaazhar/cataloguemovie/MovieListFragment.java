@@ -2,6 +2,7 @@ package com.example.annisaazhar.cataloguemovie;
 
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,6 +30,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import static com.example.annisaazhar.cataloguemovie.MainActivity.KEY_PAGETYPE;
 import static com.example.annisaazhar.cataloguemovie.MainActivity.TAG_NOW_PLAYING;
 import static com.example.annisaazhar.cataloguemovie.MainActivity.TAG_UPCOMING;
+import static com.example.annisaazhar.cataloguemovie.provider.DatabaseContract.CONTENT_URI;
 
 
 /**
@@ -108,8 +110,11 @@ public class MovieListFragment extends Fragment {
 
                     Intent intent = new Intent(getContext(), DetailsActivity.class);
                     int movieID = movieList.get(recyclerViewItemPosition).getMovieId();
+                    int id = movieList.get(recyclerViewItemPosition).get_id();
+                    Uri uri = Uri.parse(CONTENT_URI+"/"+id);
+                    intent.setData(uri);
                     intent.putExtra(MOVIE_ID, movieID);
-                    startActivity(intent);
+                    startActivityForResult(intent, DetailsActivity.REQUEST_CODE);
                 }
 
                 return false;
@@ -125,6 +130,19 @@ public class MovieListFragment extends Fragment {
 
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == DetailsActivity.REQUEST_CODE) {
+            if (resultCode == DetailsActivity.RESULT_ADD) {
+                Toast.makeText(getContext(), "Berhasil menambahkan ke favorit", Toast.LENGTH_LONG).show();
+            } else if (resultCode == DetailsActivity.RESULT_DELETE) {
+                Toast.makeText(getContext(), "Berhasil menghapus dari favorit", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void setupRetrofit() {

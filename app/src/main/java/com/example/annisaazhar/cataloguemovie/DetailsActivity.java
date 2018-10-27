@@ -1,14 +1,20 @@
 package com.example.annisaazhar.cataloguemovie;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.annisaazhar.cataloguemovie.provider.DatabaseContract;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -20,12 +26,23 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.example.annisaazhar.cataloguemovie.MovieListFragment.MOVIE_ID;
+import static com.example.annisaazhar.cataloguemovie.provider.DatabaseContract.CONTENT_URI;
+import static com.example.annisaazhar.cataloguemovie.provider.DatabaseContract.FavColumns.DATE;
+import static com.example.annisaazhar.cataloguemovie.provider.DatabaseContract.FavColumns.DESCRIPTION;
+import static com.example.annisaazhar.cataloguemovie.provider.DatabaseContract.FavColumns.POSTER;
+import static com.example.annisaazhar.cataloguemovie.provider.DatabaseContract.FavColumns.TITLE;
+import static com.example.annisaazhar.cataloguemovie.provider.DatabaseContract.FavColumns.UNIQUEID;
 
 public class DetailsActivity extends AppCompatActivity {
     private static Retrofit retrofit;
+    public static int REQUEST_CODE = 100;
+    public static int RESULT_ADD = 101;
+    public static int RESULT_DELETE = 102;
 
     TextView tvTitleDetail, tvDuration, tvGenre, tvDateReleased, tvRating, tvOverview;
     ImageView ivPosterDetail;
+    CheckBox btnFavourite;
+    Movie movie;
 
     public UIUtils uiUtils;
 
@@ -43,6 +60,39 @@ public class DetailsActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         uiUtils = new UIUtils(getApplicationContext());
+        int movieId = getIntent().getIntExtra(MOVIE_ID, 0);
+        btnFavourite = findViewById(R.id.btnFav);
+        final String[] args = {Integer.toString(movieId)};
+        final String selection = DatabaseContract.FavColumns.UNIQUEID + " == ? ";
+        final Cursor cursor = getContentResolver().query(CONTENT_URI, null, selection, args, null);
+        btnFavourite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ContentValues values = new ContentValues();
+                values.put(UNIQUEID, movie.getMovieId());
+                values.put(TITLE, movie.getTitle());
+                values.put(DESCRIPTION, movie.getDescription());
+                values.put(DATE, movie.getDate());
+                values.put(POSTER, movie.getPosterUrl());
+                if (cursor.getCount() == 0) {
+                    getContentResolver().insert(CONTENT_URI, values);
+                    btnFavourite.setChecked(true);
+                    setResult(RESULT_ADD);
+                    finish();
+                } else {
+                    Uri uri = Uri.parse(CONTENT_URI + "/" + Integer.toString(movie.get_id()));
+                    getContentResolver().delete(uri, DatabaseContract.FavColumns.UNIQUEID, args);
+                    btnFavourite.setChecked(false);
+                    setResult(RESULT_DELETE);
+                    finish();
+                }
+            }
+        });
+
+        if (cursor.getCount() != 0) {
+            btnFavourite.setChecked(true);
+            cursor.close();
+        }
 
         tvTitleDetail = findViewById(R.id.tvTitleDetail);
         tvDuration = findViewById(R.id.tvDuration);
@@ -51,9 +101,6 @@ public class DetailsActivity extends AppCompatActivity {
         tvRating = findViewById(R.id.tvRating);
         tvOverview = findViewById(R.id.tvOverview);
         ivPosterDetail = findViewById(R.id.ivPosterDetail);
-
-        int movieId = getIntent().getIntExtra(MOVIE_ID, 0);
-
         setupRetrofit();
         getMovieDetails(movieId);
     }
@@ -85,7 +132,7 @@ public class DetailsActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<Movie> call, @NonNull Response<Movie> response) {
                 if (response.isSuccessful()) {
-                    Movie movie = response.body();
+                    movie = response.body();
                     if (movie != null) {
                         renderMovieDetails(movie);
                     }
