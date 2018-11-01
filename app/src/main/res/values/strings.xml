@@ -26,5 +26,7 @@
     <string name="text_nav_open">Pengaturan</string>
     <string name="text_minutes">%s menit</string>
     <string name="text_movie_details">Detail Film</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>
