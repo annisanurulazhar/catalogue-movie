@@ -2,6 +2,7 @@ package com.example.annisaazhar.cataloguemovie;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -36,7 +37,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
@@ -69,6 +72,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Cursor listFav;
 
+    private Movie movie = null;
+
+    private DailyNotifReceiver dailyNotifReceiver;
+
+    private SharedPreferences sp;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +106,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setupRecyclerView();
 
         new LoadFavAsync().execute();
+
+        Date today = new Date();
+        getMovieReleasedToday(today);
+
+        dailyNotifReceiver = new DailyNotifReceiver();
+
+        sp = getSharedPreferences("notif_setting", MODE_PRIVATE);
     }
 
     @Override
@@ -236,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+        String title = item.getTitle().toString();
 
         if (id == R.id.nav_settings) {
             Intent mIntent = new Intent(Settings.ACTION_LOCALE_SETTINGS);
@@ -243,6 +260,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.fav_menu) {
             Intent favIntent = new Intent(MainActivity.this, FavActivity.class);
             startActivity(favIntent);
+        } else if (id == R.id.notif_menu) {
+            boolean active = sp.getBoolean("isOn", false);
+            if (!active) {
+                setDailyNotifReceiver();
+            } else {
+                cancelDailyNotifReceiver();
+            }
         }
         return false;
     }
@@ -276,6 +300,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private void setDailyNotifReceiver(){
+        dailyNotifReceiver.setNotification(this,DailyNotifReceiver.TYPE_REMINDER,"07:00","Check latest movies now!");
+
+        if (movie != null) {
+            dailyNotifReceiver.setNotification(this, DailyNotifReceiver.TYPE_RELEASE, "08:00", movie.getTitle() + " is released today!");
+        } else {
+            dailyNotifReceiver.setNotification(this,DailyNotifReceiver.TYPE_RELEASE,"08:00","No new movies today, but have you watched all in NowPlaying?");
+        }
+
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean("isOn", true);
+        editor.apply();
+
+        Toast.makeText(this, "Set", Toast.LENGTH_LONG).show();
+    }
+
+    private void cancelDailyNotifReceiver() {
+        dailyNotifReceiver.cancelAlarm(this, DailyNotifReceiver.TYPE_REMINDER);
+        dailyNotifReceiver.cancelAlarm(this, DailyNotifReceiver.TYPE_RELEASE);
+
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean("isOn", false);
+        editor.apply();
+        Toast.makeText(this, "Canceled", Toast.LENGTH_LONG).show();
+    }
 
     private void setupRetrofit() {
         if (retrofit == null) {
@@ -316,6 +365,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void getMovieReleasedToday(Date d) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        final String date = simpleDateFormat.format(d);
+        setupRetrofit();
+        MovieApiService movieApiService = retrofit.create(MovieApiService.class);
+        Call<MovieResponse> call = movieApiService.getUpcomingMovies(BuildConfig.API_KEY);
+        call.enqueue(new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
+                if (response.body() != null) {
+                    if (response.body().getResults().size() > 0) {
+                        List<Movie> upcoming = response.body().getResults();
+                        for (Movie m: upcoming) {
+                            if (m.getDate().equals(date)) {
+                                movie = m;
+                                break;
+                            }
+                        }
+                        if (movie != null) {
+                            Toast.makeText(getApplicationContext(), movie.getTitle(), Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Tidak ada film yang rilis hari ini", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                Log.e(TAG, t.toString());
+                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     private void setupRecyclerView() {

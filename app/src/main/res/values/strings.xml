@@ -28,5 +28,7 @@
     <string name="text_movie_details">Detail Film</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+    <string name="turn_on_notification">Turn on Notification</string>
+    <string name="turn_off_on_notification">Turn on/off Notification</string>
 
 </resources>

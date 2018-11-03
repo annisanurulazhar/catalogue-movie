@@ -22,6 +22,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         this.inflater = LayoutInflater.from(context);
         this.movieList = new ArrayList<>();
     }
+
     @NonNull
     @Override
     public MoviesAdapter.MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
