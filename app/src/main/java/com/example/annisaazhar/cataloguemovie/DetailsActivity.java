@@ -106,6 +106,19 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable("movie", movie);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        movie = savedInstanceState.getParcelable("movie");
+        renderMovieDetails(movie);
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
