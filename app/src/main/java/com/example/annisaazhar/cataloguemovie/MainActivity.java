@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private RecyclerView rvContentSearch;
     private View ChildView;
     private MoviesAdapter moviesAdapter;
-    private List<Movie> movieList = new ArrayList<>();
+    private ArrayList<Movie> movieList = new ArrayList<>();
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static Retrofit retrofit;
@@ -104,6 +104,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         rvContentSearch = findViewById(R.id.rvContentSearch);
         setupRecyclerView();
+
+        moviesAdapter = new MoviesAdapter(this);
+        rvContentSearch.setAdapter(moviesAdapter);
+        rvContentSearch.setVisibility(View.GONE);
 
         new LoadFavAsync().execute();
 
@@ -177,6 +181,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         searchView.setQueryHint(getString(R.string.film_search_hint));
         return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("movies_search", movieList);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        movieList.clear();
+        movieList.addAll(savedInstanceState.<Movie>getParcelableArrayList("movies_search"));
+        moviesAdapter.setMovieList(movieList);
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -336,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void searchMovieByKeyword(final String query) {
+        rvContentSearch.setVisibility(View.VISIBLE);
         setupRetrofit();
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
         Call<MovieResponse> call = movieApiService.searchMovie(BuildConfig.API_KEY, query, 1);
@@ -345,9 +364,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (response.body() != null) {
                     if (response.body().getResults().size() > 0) {
                         movieList.clear();
-                        movieList = response.body().getResults();
-                        moviesAdapter = new MoviesAdapter(getApplicationContext());
-                        rvContentSearch.setAdapter(moviesAdapter);
+                        movieList.addAll(response.body().getResults());
                         moviesAdapter.setMovieList(movieList);
                         setOnItemClickListener();
                         Log.d(TAG, "Number of movies received: " + movieList.size());
@@ -362,7 +379,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
                 Log.e(TAG, t.toString());
-                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -386,10 +403,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             }
                         }
                         if (movie != null) {
-                            Toast.makeText(getApplicationContext(), movie.getTitle(), Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), movie.getTitle(), Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(getApplicationContext(), "Tidak ada film yang rilis hari ini", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getApplicationContext(), "Tidak ada film yang rilis hari ini", Toast.LENGTH_LONG).show();
                     }
                 }
 
@@ -398,7 +415,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
                 Log.e(TAG, t.toString());
-                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
             }
         });
 

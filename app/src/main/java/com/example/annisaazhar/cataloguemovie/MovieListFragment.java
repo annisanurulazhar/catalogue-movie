@@ -40,9 +40,10 @@ public class MovieListFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private View ChildView;
-    private List<Movie> movieListNowPlaying = new ArrayList<>();
-    private List<Movie> movieListUpcoming = new ArrayList<>();
+    private ArrayList<Movie> movieListNowPlaying = new ArrayList<>();
+    private ArrayList<Movie> movieListUpcoming = new ArrayList<>();
     private String pageType;
+    MoviesAdapter moviesAdapter;
 
     private static final String TAG = MovieListFragment.class.getSimpleName();
     private static Retrofit retrofit;
@@ -71,20 +72,43 @@ public class MovieListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(itemDecor);
+
         return view;
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         setupRetrofit();
 
+        moviesAdapter = new MoviesAdapter(getContext());
+        recyclerView.setAdapter(moviesAdapter);
         if (pageType.equals(TAG_NOW_PLAYING)) {
-            fetchNowPlayingMovies();
+            if (savedInstanceState == null) {
+                fetchNowPlayingMovies();
+            } else {
+                movieListNowPlaying = savedInstanceState.getParcelableArrayList("movies_np");
+                moviesAdapter.setMovieList(movieListNowPlaying);
+                setOnItemClickListener(movieListNowPlaying);
+            }
 
         } else if (pageType.equals(TAG_UPCOMING)) {
-            fetchUpcomingMovies();
+            if (savedInstanceState == null) {
+                fetchUpcomingMovies();
+            } else {
+                movieListUpcoming = savedInstanceState.getParcelableArrayList("movies_upcoming");
+                moviesAdapter.setMovieList(movieListUpcoming);
+                setOnItemClickListener(movieListUpcoming);
+            }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putParcelableArrayList("movies_np", movieListNowPlaying);
+        outState.putParcelableArrayList("movies_upcoming", movieListUpcoming);
+        super.onSaveInstanceState(outState);
     }
 
     private void setOnItemClickListener(final List<Movie> movieList) {
@@ -162,6 +186,7 @@ public class MovieListFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                 onRetrieveMovies(response, movieListNowPlaying);
+                Log.d("size", Integer.toString(movieListNowPlaying.size()));
             }
 
             @Override
@@ -190,10 +215,9 @@ public class MovieListFragment extends Fragment {
     private void onRetrieveMovies(Response<MovieResponse> movieResponse, List<Movie> movieList) {
         movieList.clear();
         if (movieResponse.body() != null) {
-            movieList = movieResponse.body().getResults();
+            movieList.clear();
+            movieList.addAll(movieResponse.body().getResults());
         }
-        MoviesAdapter moviesAdapter = new MoviesAdapter(getContext());
-        recyclerView.setAdapter(moviesAdapter);
         moviesAdapter.setMovieList(movieList);
         setOnItemClickListener(movieList);
         Log.d(TAG, "Number of movies received: " + movieList.size());
